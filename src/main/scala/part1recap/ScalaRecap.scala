@@ -1,8 +1,9 @@
 package part1recap
 
 import java.util.concurrent.Executors
+
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 
 object ScalaRecap {
 
@@ -62,6 +63,65 @@ object ScalaRecap {
     n <- List(1,2,3)
     c <- List('a','b','c')
   }yield(n,c)
+
+  //options and try
+  val anOption:Option[Int] = Option(/*Something that might be null*/43)
+  val doubleOption = anOption.map(_*2)
+
+  val   anAttempt: Try[Int] = Try(12)
+  val modifiedAttempt  = anAttempt.map(_*10)
+
+  //Pattern Matching
+  val anUnknown:Any = 45
+  val medal = anUnknown match {
+    case 1 => "gold"
+    case 2 => "silver"
+    case 2 => "bronze"
+    case _=> "no medal"
+  }
+  val optionDescription = anOption match {
+    case  Some(value)   => s"the option is not empty $value"
+    case None => "hte option is empty"
+  }
+
+  //Futures
+  implicit val ec: ExecutionContext  = ExecutionContext.fromExecutorService( Executors.newFixedThreadPool(8))
+  val aFuture = Future(/*Something to be evaluated on another thread*/1+999)
+
+  aFuture.onComplete {
+    case Success(value) => println(s"the async value is $value")
+    case Failure(exception) => println(s"the meaning of value failed: $exception")
+  }
+ val aPartialFunction : PartialFunction[Try[Int],Unit] = {
+   case Success(value) => println(s"the async value is $value")
+   case Failure(exception) => println(s"the meaning of value failed: $exception")
+ }
+
+  //map,flatMap,filter
+  val doubledAsyncMOL: Future[Int] = aFuture.map(_*2)
+
+  //implicits
+  //1 implicit arguments and value
+  implicit val timout:Int = 1000
+  def setTimeout(f: () => Unit)(implicit tout:Int) = {
+    Thread.sleep(tout)
+  }
+
+
+  //2 extension methods
+  implicit class MyRichInt(number:Int) {
+    def isEven : Boolean = number %2 == 0
+  }
+
+  setTimeout(() => println("timeout"))
+
+  val is2Even = 2.isEven
+
+  //3 conversion
+  implicit def string2person(name:String):Person =
+    Person(name,57)
+
+  val daniel:Person = "Daniel"
   def main(args: Array[String]): Unit = {
 
   }
